@@ -3,22 +3,19 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
-class Post(Base):
-    __tablename__ = "posts"
+class Category(Base):
+    __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String(255), nullable=False)
-    content = Column(Text, nullable=False)
-    published = Column(Boolean, server_default="TRUE", nullable=False)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=True)
     created_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
+        TIMESTAMP(timezone=True), 
+        nullable=False, 
         server_default=func.now()
     )
 
-    # Foreign key (keyinroq User qo'shganda)
-    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
-    owner = relationship("User", back_populates="posts")
+    posts = relationship("Post", back_populates="category")
 
 
 class User(Base):
@@ -35,3 +32,33 @@ class User(Base):
     )
 
     posts = relationship("Post", back_populates="owner")
+
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    published = Column(Boolean, server_default="TRUE", nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
+
+    # User bilan bog'lanish
+    owner_id = Column(
+        Integer, 
+        ForeignKey("users.id", ondelete="CASCADE"), 
+        nullable=True
+    )
+    owner = relationship("User", back_populates="posts")
+
+    # Category bilan bog'lanish
+    category_id = Column(
+        Integer, 
+        ForeignKey("categories.id", ondelete="SET NULL"), 
+        nullable=True
+    )
+    category = relationship("Category", back_populates="posts")

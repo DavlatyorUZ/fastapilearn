@@ -1,50 +1,16 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
-# ─── POST SCHEMAS ─────────────────────────────
-
-class PostBase(BaseModel):
-    title: str              # post title
-    content: str            # post content
-    published: bool = True  # default = True
-
-class PostCreate(PostBase):
-    pass  # used when creating a post (same fields as base)
-
-class PostUpdate(PostBase):
-    pass  # used when updating a post (same fields)
-
-class PostResponse(PostBase):
-    id: int                 # comes from DB
-    created_at: datetime    # timestamp from DB
-    owner_id: Optional[int] = None  # may be None
-
-    class Config:
-        from_attributes = True  # allows reading from ORM (DB model)
-
 # ─── USER SCHEMAS ─────────────────────────────
-
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
     username: str
-    email: EmailStr   # automatically checks valid email
+    email: EmailStr
+
+class UserCreate(UserBase):
     password: str
 
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: EmailStr
-    created_at: datetime
-
-    class Config:
-        from_attributes = True  # ORM → schema conversion
-
-
-# app/schemas.py
-
-# ... (boshqa klasslar)
-
-class UserResponse(BaseModel):
+class UserResponse(UserBase):
     id: int
     username: str
     email: EmailStr
@@ -53,32 +19,48 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class PostResponse(PostBase): # Bu mavjud klass
-    id: int
-    created_at: datetime
-    owner_id: Optional[int]
 
-    class Config:
-        from_attributes = True
-
-# Yangi klass: Post egasi bilan birga
-class PostWithOwner(PostResponse):
-    owner: Optional[UserResponse] = None # models.py dagi 'owner' relationship nomi bilan bir xil bo'lishi shart
-
-
-# Kategoriya uchun asosiy schema
+# ─── CATEGORY SCHEMAS ───────────────────────────
 class CategoryBase(BaseModel):
     name: str
     description: Optional[str] = None
 
-# Kategoriya yaratish uchun schema
 class CategoryCreate(CategoryBase):
     pass
 
-# Ma'lumotni qaytarish (Response) uchun schema
 class CategoryResponse(CategoryBase):
     id: int
     created_at: datetime
 
     class Config:
-        from_attributes = True # Pydantic v2 uchun (v1 bo'lsa orm_mode = True)
+        from_attributes = True
+
+
+# ─── POST SCHEMAS ─────────────────────────────
+class PostBase(BaseModel):
+    title: str
+    content: str
+    published: bool = True
+    category_id: Optional[int] = None # Kategoriya bog'liqligi uchun
+
+class PostCreate(PostBase):
+    pass
+
+class PostUpdate(BaseModel): # Update uchun barcha maydonlarni ixtiyoriy qilish yaxshi amaliyot
+    title: Optional[str] = None
+    content: Optional[str] = None
+    published: Optional[bool] = None
+    category_id: Optional[int] = None
+
+class PostResponse(PostBase):
+    id: int
+    created_at: datetime
+    owner_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+# Relationship ma'lumotlari (User va Category) bilan qaytadigan Post
+class PostWithOwner(PostResponse):
+    owner: Optional[UserResponse] = None
+    category: Optional[CategoryResponse] = None
