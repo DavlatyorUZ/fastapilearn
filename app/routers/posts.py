@@ -28,9 +28,14 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     "/",
     response_model=List[schemas.PostResponse]
 )
+# ─── READ ALL (Search + Pagination + Owner) ───
+@router.get(
+    "/",
+    response_model=List[schemas.PostWithOwner]
+)
 def get_all_posts(
     db: Session = Depends(get_db),
-    limit: int = 10,                # Nechta post ko'rsatish
+    limit: int = 10,                # Nechta post qaytarish
     skip: int = 0,                 # Nechtasini o'tkazib yuborish
     search: Optional[str] = ""      # Sarlavha bo'yicha qidirish
 ):
@@ -42,12 +47,6 @@ def get_all_posts(
     ).limit(limit).offset(skip).all()
     
     return posts
-
-# ─── READ ONE ─────────────────────────────────
-@router.get(
-    "/{post_id}",
-    response_model=schemas.PostResponse
-)
 def get_post(post_id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
 
@@ -102,3 +101,28 @@ def delete_post(post_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return None
+
+# ─── PARTIAL UPDATE (PATCH) ───────────────────
+@router.patch("/{post_id}", response_model=schemas.PostResponse)
+def partial_update(
+    post_id: int, 
+    post: schemas.PostUpdate, 
+    db: Session = Depends(get_db)
+):
+    post_query = db.query(models.Post).filter(models.Post.id == post_id)
+    existing_post = post_query.first()
+    
+    if not existing_post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"ID={post_id} bo'lgan post topilmadi"
+        )
+    
+    # exclude_unset=True — faqat foydalanuvchi yuborgan maydonlarni oladi
+    # Masalan, faqat 'title' yuborilsa, 'content' o'zgarmasdan qoladi
+    update_data = post.dict(exclude_unset=True)
+    
+    post_query.update(update_data, synchronize_session=False)
+    db.commit()
+    
+    return post_query.first()
