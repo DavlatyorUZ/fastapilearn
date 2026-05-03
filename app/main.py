@@ -1,19 +1,21 @@
 from fastapi import FastAPI
-from .routers import posts,  categories # Kategoriyani chaqiring
+from .database import engine
+from . import models
+from .routers import posts, users
+
+# Jadvallarni yaratish
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Blog API",
-    description="FastAPI bilan yaratilgan Blog API",
-    version="1.0.0"
+    description="FastAPI + PostgreSQL + SQLAlchemy",
+    version="2.0.0"
 )
 
-# Routers
+# Routerlarni ulash
 app.include_router(posts.router)
+app.include_router(users.router)
 
 @app.get("/")
 def root():
-    return {"xabar": "Blog API ga xush kelibsiz!"}
-
-
-app.include_router(posts.router)
-app.include_router(categories.router)
+    return {"xabar": "Blog API ga xush kelibsiz! v2.0"}
