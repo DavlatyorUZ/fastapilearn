@@ -3,6 +3,9 @@ from .database import engine
 from . import models
 from .routers import posts, users, categories
 from .config import settings
+from app.database import engine
+from app import models
+from app.routers import posts, users, categories
 
 # Jadvallarni yaratish
 models.Base.metadata.create_all(bind=engine)
