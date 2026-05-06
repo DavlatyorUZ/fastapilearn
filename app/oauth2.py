@@ -75,3 +75,13 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+def verify_refresh_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+        return username
+    except JWTError:
+        return None

@@ -73,15 +73,24 @@ class PostResponse(PostBase):
     class Config:
         from_attributes = True
 
-class PostWithOwner(PostResponse):
-    owner: Optional[OwnerInfo] = None
-    category: Optional[CategoryResponse] = None
 
+# ─── AUTH & TOKEN SCHEMAS ─────────────────────
 
-# ─── TOKEN SCHEMAS ────────────────────────────
 class Token(BaseModel):
+    """Login va Refresh muvaffaqiyatli bo'lganda qaytariladigan format"""
     access_token: str
+    refresh_token: str
     token_type: str
 
 class TokenData(BaseModel):
+    """Token dekod qilinganda ichidan olinadigan ma'lumot"""
     id: Optional[str] = None
+
+class RefreshTokenRequest(BaseModel):
+    """/refresh endpointiga yuboriladigan JSON so'rov formati"""
+    refresh_token: str
+
+class PasswordChange(BaseModel):
+    """Parolni o'zgartirish so'rovi uchun format"""
+    old_password: str
+    new_password: str
