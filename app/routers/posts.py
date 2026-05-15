@@ -87,7 +87,8 @@ def update_post(
             detail="Siz bu postni yangilay olmaysiz"
         )
 
-    post_query.update(updated_post.dict(), synchronize_session=False)
+    update_data = updated_post.dict(exclude_unset=True)
+    post_query.update(update_data, synchronize_session=False)
     db.commit()
     return post_query.first()
 

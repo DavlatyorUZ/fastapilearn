@@ -74,6 +74,16 @@ class PostResponse(PostBase):
         from_attributes = True
 
 
+# ─── TODO SCHEMAS ─────────────────────────────
+class Todo(BaseModel):
+    title: str
+    description: Optional[str] = None
+    completed: bool = False
+
+class TodoCreate(Todo):
+    pass
+
+
 # ─── AUTH & TOKEN SCHEMAS ─────────────────────
 
 class Token(BaseModel):

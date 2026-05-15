@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from ..schemas import Todo, TodoCreate # Schemas faylidan chaqiramiz
+from ..schemas import Todo, TodoCreate
 
 router = APIRouter(prefix="/todos", tags=["To-Do"])
 
@@ -13,7 +13,7 @@ def get_todos():
     return todos_db
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_todo(todo: Todo):
+def create_todo(todo: TodoCreate):
     """Yangi vazifa qo'shish"""
     global id_counter
     new_todo = todo.dict()

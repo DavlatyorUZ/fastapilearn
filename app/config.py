@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
+from pathlib import Path
 from typing import List
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str
@@ -7,8 +8,14 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
     allowed_origins: str = "http://localhost:3000"
-    environment: str = "development"   # ← YANGI
-    debug: bool = True                 # ← YANGI
+    environment: str = "development"
+    debug: bool = True
+
+    # Yangi uslubdagi konfiguratsiya
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).resolve().parent.parent / ".env",
+        extra="ignore"  # Noma'lum o'zgaruvchilarni o'tkazib yuboradi
+    )
 
     @property
     def origins_list(self) -> List[str]:
@@ -17,8 +24,5 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
-
-    class Config:
-        env_file = ".env"
 
 settings = Settings()

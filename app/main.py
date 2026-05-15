@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import posts, users, auth
+from .routers import posts, users, auth, categories, todos
 from .config import settings
 
 # Production da docs o'chirish (ixtiyoriy)
@@ -23,6 +23,8 @@ app.add_middleware(
 app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(categories.router)
+app.include_router(todos.router)
 
 @app.get("/")
 def root():
